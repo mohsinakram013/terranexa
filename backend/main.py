@@ -39,3 +39,22 @@ def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
     if not db_user or not auth.verify_password(user.password, db_user.password):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     return {"message": "Login successful", "user_id": db_user.id}
+@app.post("/farms", response_model=schemas.FarmOut)
+def create_farm(farm: schemas.FarmCreate, owner_id: int, db: Session = Depends(get_db)):
+    new_farm = models.Farm(
+        name=farm.name,
+        location=farm.location,
+        area=farm.area,
+        soil_type=farm.soil_type,
+        crop=farm.crop,
+        owner_id=owner_id
+    )
+    db.add(new_farm)
+    db.commit()
+    db.refresh(new_farm)
+    return new_farm
+
+@app.get("/farms/{owner_id}")
+def get_farms(owner_id: int, db: Session = Depends(get_db)):
+    farms = db.query(models.Farm).filter(models.Farm.owner_id == owner_id).all()
+    return farms
