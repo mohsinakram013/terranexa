@@ -7,8 +7,15 @@ import auth
 from soil_logic import calculate_soil_health
 models.Base.metadata.create_all(bind=engine)
 from crop_logic import recommend_crops
+from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 def get_db():
     db = SessionLocal()
     try:
