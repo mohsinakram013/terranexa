@@ -57,3 +57,12 @@ class SoilOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+class CropRequest(BaseModel):
+    nitrogen: float
+    phosphorus: float
+    potassium: float
+    ph: float
+    temperature: float
+    humidity: float
+    rainfall: float

@@ -6,7 +6,7 @@ import schemas
 import auth
 from soil_logic import calculate_soil_health
 models.Base.metadata.create_all(bind=engine)
-
+from crop_logic import recommend_crops
 app = FastAPI()
 
 def get_db():
@@ -82,4 +82,17 @@ def create_soil_record(farm_id: int, soil: schemas.SoilCreate, db: Session = Dep
     db.add(new_record)
     db.commit()
     db.refresh(new_record)
-    return new_record
+     
+    return new_record 
+@app.post("/crop-recommendation")
+def get_crop_recommendation(data: schemas.CropRequest):
+    results = recommend_crops(
+        data.nitrogen,
+        data.phosphorus,
+        data.potassium,
+        data.ph,
+        data.temperature,
+        data.humidity,
+        data.rainfall
+    )
+    return {"recommendations": results}
