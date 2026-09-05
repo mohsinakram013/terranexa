@@ -75,11 +75,14 @@
 
             const data = await response.json();
 
-            if (response.ok) {
-                document.getElementById("message").style.color = "green";
-                document.getElementById("message").innerText = "Login successful!";
-            } else {
-                document.getElementById("message").style.color = "red";
+           if (response.ok) {
+    localStorage.setItem("user_id", data.user_id);
+    document.getElementById("message").style.color = "green";
+    document.getElementById("message").innerText = "Login successful! Redirecting...";
+    setTimeout(function() {
+        window.location.href = "dashboard.html";
+    }, 1000);
+} else {     document.getElementById("message").style.color = "red";
                 document.getElementById("message").innerText = data.detail || "Login failed";
             }
         }

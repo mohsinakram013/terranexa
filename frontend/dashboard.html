@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TerraNexa - Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f5f0;
+            margin: 0;
+            padding: 20px;
+        }
+        .navbar {
+            background-color: #2d6a4f;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #2d6a4f;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 6px 0;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #2d6a4f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1b4332;
+        }
+        .farm-item {
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <h3>🌱 TerraNexa Dashboard</h3>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2>Add New Farm</h2>
+            <input type="text" id="farmName" placeholder="Farm Name">
+            <input type="text" id="location" placeholder="Location">
+            <input type="number" id="area" placeholder="Area (acres)">
+            <input type="text" id="soilType" placeholder="Soil Type">
+            <input type="text" id="crop" placeholder="Crop">
+            <button onclick="addFarm()">Add Farm</button>
+            <p id="farmMessage"></p>
+        </div>
+
+        <div class="card">
+            <h2>My Farms</h2>
+            <div id="farmsList">Loading...</div>
+        </div>
+    </div>
+
+    <script>
+        const userId = localStorage.getItem("user_id");
+
+        if (!userId) {
+            window.location.href = "login.html";
+        }
+
+        function logout() {
+            localStorage.removeItem("user_id");
+            window.location.href = "login.html";
+        }
+
+        async function loadFarms() {
+            const response = await fetch(`http://127.0.0.1:8000/farms/${userId}`);
+            const farms = await response.json();
+
+            const farmsList = document.getElementById("farmsList");
+
+            if (farms.length === 0) {
+                farmsList.innerHTML = "<p>No farms added yet.</p>";
+                return;
+            }
+
+            farmsList.innerHTML = "";
+            farms.forEach(farm => {
+                farmsList.innerHTML += `
+                    <div class="farm-item">
+                        <strong>${farm.name}</strong> - ${farm.location}<br>
+                        Area: ${farm.area} acres | Soil: ${farm.soil_type} | Crop: ${farm.crop}
+                    </div>
+                `;
+            });
+        }
+
+        async function addFarm() {
+            const name = document.getElementById("farmName").value;
+            const location = document.getElementById("location").value;
+            const area = document.getElementById("area").value;
+            const soilType = document.getElementById("soilType").value;
+            const crop = document.getElementById("crop").value;
+
+            const response = await fetch(`http://127.0.0.1:8000/farms?owner_id=${userId}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: name,
+                    location: location,
+                    area: parseFloat(area),
+                    soil_type: soilType,
+                    crop: crop
+                })
+            });
+
+            if (response.ok) {
+                document.getElementById("farmMessage").style.color = "green";
+                document.getElementById("farmMessage").innerText = "Farm added!";
+                loadFarms();
+            } else {
+                document.getElementById("farmMessage").style.color = "red";
+                document.getElementById("farmMessage").innerText = "Failed to add farm";
+            }
+        }
+
+        loadFarms();
+    </script>
+
+</body>
+</html>
