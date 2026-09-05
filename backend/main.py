@@ -9,6 +9,10 @@ models.Base.metadata.create_all(bind=engine)
 from crop_logic import recommend_crops
 from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
+from fastapi import UploadFile, File
+import shutil
+import os
+from disease_logic import analyze_leaf_image
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -103,3 +107,14 @@ def get_crop_recommendation(data: schemas.CropRequest):
         data.rainfall
     )
     return {"recommendations": results}
+@app.post("/disease-detection")
+async def detect_disease(file: UploadFile = File(...)):
+    upload_folder = "uploads"
+    os.makedirs(upload_folder, exist_ok=True)
+
+    file_path = os.path.join(upload_folder, file.filename)
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    result = analyze_leaf_image(file_path)
+    return result
