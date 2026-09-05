@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TerraNexa - Soil Analysis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f5f0;
+            margin: 0;
+            padding: 20px;
+        }
+        .navbar {
+            background-color: #2d6a4f;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 15px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #2d6a4f;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 6px 0;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #2d6a4f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1b4332;
+        }
+        .score-box {
+            text-align: center;
+            padding: 20px;
+        }
+        .score-number {
+            font-size: 48px;
+            font-weight: bold;
+            color: #2d6a4f;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <h3>🌱 Soil Analysis</h3>
+        <div>
+            <a href="dashboard.html">Dashboard</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2>Enter Soil Data</h2>
+            <input type="number" id="farmId" placeholder="Farm ID">
+            <input type="number" id="nitrogen" placeholder="Nitrogen">
+            <input type="number" id="phosphorus" placeholder="Phosphorus">
+            <input type="number" id="potassium" placeholder="Potassium">
+            <input type="number" id="ph" placeholder="pH" step="0.1">
+            <input type="number" id="moisture" placeholder="Moisture (%)">
+            <input type="number" id="temperature" placeholder="Temperature (°C)">
+            <button onclick="analyzeSoil()">Analyze Soil</button>
+        </div>
+
+        <div class="card score-box" id="resultBox" style="display:none;">
+            <h2>Soil Health Score</h2>
+            <div class="score-number" id="scoreNumber"></div>
+        </div>
+    </div>
+
+    <script>
+        async function analyzeSoil() {
+            const farmId = document.getElementById("farmId").value;
+            const nitrogen = parseFloat(document.getElementById("nitrogen").value);
+            const phosphorus = parseFloat(document.getElementById("phosphorus").value);
+            const potassium = parseFloat(document.getElementById("potassium").value);
+            const ph = parseFloat(document.getElementById("ph").value);
+            const moisture = parseFloat(document.getElementById("moisture").value);
+            const temperature = parseFloat(document.getElementById("temperature").value);
+
+            const response = await fetch(`http://127.0.0.1:8000/soil-analysis/${farmId}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    nitrogen: nitrogen,
+                    phosphorus: phosphorus,
+                    potassium: potassium,
+                    ph: ph,
+                    moisture: moisture,
+                    temperature: temperature
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById("resultBox").style.display = "block";
+                document.getElementById("scoreNumber").innerText = data.health_score + " / 100";
+            } else {
+                alert("Failed to analyze soil. Check Farm ID exists.");
+            }
+        }
+    </script>
+
+</body>
+</html>
