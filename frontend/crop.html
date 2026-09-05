@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TerraNexa - Crop Recommendation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f5f0;
+            margin: 0;
+            padding: 20px;
+        }
+        .navbar {
+            background-color: #2d6a4f;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 15px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #2d6a4f;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 6px 0;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #2d6a4f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1b4332;
+        }
+        .crop-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .crop-name {
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .crop-score {
+            color: #2d6a4f;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <h3>🌱 Crop Recommendation</h3>
+        <div>
+            <a href="dashboard.html">Dashboard</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2>Enter Field Data</h2>
+            <input type="number" id="nitrogen" placeholder="Nitrogen">
+            <input type="number" id="phosphorus" placeholder="Phosphorus">
+            <input type="number" id="potassium" placeholder="Potassium">
+            <input type="number" id="ph" placeholder="pH" step="0.1">
+            <input type="number" id="temperature" placeholder="Temperature (°C)">
+            <input type="number" id="humidity" placeholder="Humidity (%)">
+            <input type="number" id="rainfall" placeholder="Rainfall (mm)">
+            <button onclick="getRecommendation()">Get Recommendation</button>
+        </div>
+
+        <div class="card" id="resultBox" style="display:none;">
+            <h2>Recommended Crops</h2>
+            <div id="cropsList"></div>
+        </div>
+    </div>
+
+    <script>
+        async function getRecommendation() {
+            const data = {
+                nitrogen: parseFloat(document.getElementById("nitrogen").value),
+                phosphorus: parseFloat(document.getElementById("phosphorus").value),
+                potassium: parseFloat(document.getElementById("potassium").value),
+                ph: parseFloat(document.getElementById("ph").value),
+                temperature: parseFloat(document.getElementById("temperature").value),
+                humidity: parseFloat(document.getElementById("humidity").value),
+                rainfall: parseFloat(document.getElementById("rainfall").value)
+            };
+
+            const response = await fetch("http://127.0.0.1:8000/crop-recommendation", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                const cropsList = document.getElementById("cropsList");
+                cropsList.innerHTML = "";
+
+                result.recommendations.forEach(item => {
+                    cropsList.innerHTML += `
+                        <div class="crop-item">
+                            <span class="crop-name">${item.crop}</span>
+                            <span class="crop-score">${item.suitability}%</span>
+                        </div>
+                    `;
+                });
+
+                document.getElementById("resultBox").style.display = "block";
+            } else {
+                alert("Failed to get recommendation.");
+            }
+        }
+    </script>
+
+</body>
+</html>
