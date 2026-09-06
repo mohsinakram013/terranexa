@@ -29,4 +29,4 @@ def analyze_leaf_image(image_path):
         "confidence": confidence,
         "advice": advice,
         "note": "This is an AI-assisted preliminary detection, not a guaranteed diagnosis. Please consult an agriculture expert for confirmation."
-    }
+    }uvicorn main:app --reload

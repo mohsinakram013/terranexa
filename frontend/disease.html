@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TerraNexa - Disease Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f5f0;
+            margin: 0;
+            padding: 20px;
+        }
+        .navbar {
+            background-color: #2d6a4f;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 15px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #2d6a4f;
+        }
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #2d6a4f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1b4332;
+        }
+        #preview {
+            max-width: 100%;
+            margin-top: 10px;
+            border-radius: 8px;
+            display: none;
+        }
+        .result-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2d6a4f;
+        }
+        .confidence {
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .disclaimer {
+            font-size: 12px;
+            color: #888;
+            margin-top: 15px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <h3>🌱 Disease Detection</h3>
+        <div>
+            <a href="dashboard.html">Dashboard</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2>Upload Leaf Image</h2>
+            <input type="file" id="imageInput" accept="image/*" onchange="previewImage()">
+            <img id="preview">
+            <br>
+            <button onclick="detectDisease()">Analyze Image</button>
+        </div>
+
+        <div class="card" id="resultBox" style="display:none;">
+            <div class="result-title" id="resultTitle"></div>
+            <div class="confidence" id="confidenceText"></div>
+            <p id="adviceText"></p>
+            <p class="disclaimer" id="noteText"></p>
+        </div>
+    </div>
+
+    <script>
+        function previewImage() {
+            const file = document.getElementById("imageInput").files[0];
+            if (file) {
+                const preview = document.getElementById("preview");
+                preview.src = URL.createObjectURL(file);
+                preview.style.display = "block";
+            }
+        }
+
+        async function detectDisease() {
+            const fileInput = document.getElementById("imageInput");
+            if (fileInput.files.length === 0) {
+                alert("Please select an image first.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            const response = await fetch("http://127.0.0.1:8000/disease-detection", {
+                method: "POST",
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById("resultTitle").innerText = data.result;
+                document.getElementById("confidenceText").innerText = "Confidence: " + data.confidence + "%";
+                document.getElementById("adviceText").innerText = data.advice;
+                document.getElementById("noteText").innerText = data.note;
+                document.getElementById("resultBox").style.display = "block";
+            } else {
+                alert("Failed to analyze image.");
+            }
+        }
+    </script>
+
+</body>
+</html>
