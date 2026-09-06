@@ -66,3 +66,9 @@ class CropRequest(BaseModel):
     temperature: float
     humidity: float
     rainfall: float
+
+class YieldRequest(BaseModel):
+    crop: str
+    area: float
+    soil_health_score: float
+    rainfall: float

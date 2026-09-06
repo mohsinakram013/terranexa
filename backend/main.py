@@ -7,6 +7,7 @@ import auth
 from soil_logic import calculate_soil_health
 models.Base.metadata.create_all(bind=engine)
 from crop_logic import recommend_crops
+from yield_logic import predict_yield
 from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 from fastapi import UploadFile, File
@@ -117,4 +118,13 @@ async def detect_disease(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
 
     result = analyze_leaf_image(file_path)
+    return result
+@app.post("/yield-prediction")
+def get_yield_prediction(data: schemas.YieldRequest):
+    result = predict_yield(
+        data.crop,
+        data.area,
+        data.soil_health_score,
+        data.rainfall
+    )
     return result
