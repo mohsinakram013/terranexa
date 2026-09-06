@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TerraNexa - Yield Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f5f0;
+            margin: 0;
+            padding: 20px;
+        }
+        .navbar {
+            background-color: #2d6a4f;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 15px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #2d6a4f;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 6px 0;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #2d6a4f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1b4332;
+        }
+        .result-box {
+            text-align: center;
+            padding: 10px;
+        }
+        .yield-number {
+            font-size: 42px;
+            font-weight: bold;
+            color: #2d6a4f;
+        }
+        .note {
+            font-size: 12px;
+            color: #888;
+            font-style: italic;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <h3>🌱 Yield Prediction</h3>
+        <div>
+            <a href="dashboard.html">Dashboard</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2>Enter Details</h2>
+            <input type="text" id="crop" placeholder="Crop (e.g. Wheat, Rice, Maize, Cotton)">
+            <input type="number" id="area" placeholder="Area (acres)">
+            <input type="number" id="soilScore" placeholder="Soil Health Score (0-100)">
+            <input type="number" id="rainfall" placeholder="Rainfall (mm)">
+            <button onclick="predictYield()">Predict Yield</button>
+        </div>
+
+        <div class="card result-box" id="resultBox" style="display:none;">
+            <h2>Estimated Yield</h2>
+            <div class="yield-number" id="totalYield"></div>
+            <p id="perHectare"></p>
+            <p class="note" id="noteText"></p>
+        </div>
+    </div>
+
+    <script>
+        async function predictYield() {
+            const data = {
+                crop: document.getElementById("crop").value,
+                area: parseFloat(document.getElementById("area").value),
+                soil_health_score: parseFloat(document.getElementById("soilScore").value),
+                rainfall: parseFloat(document.getElementById("rainfall").value)
+            };
+
+            const response = await fetch("http://127.0.0.1:8000/yield-prediction", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                document.getElementById("totalYield").innerText = result.total_estimated_yield_tons + " tons";
+                document.getElementById("perHectare").innerText = result.estimated_yield_per_hectare + " tons/hectare";
+                document.getElementById("noteText").innerText = result.note;
+                document.getElementById("resultBox").style.display = "block";
+            } else {
+                alert("Failed to predict yield.");
+            }
+        }
+    </script>
+
+</body>
+</html>
